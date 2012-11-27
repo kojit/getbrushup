@@ -15,11 +15,11 @@ def getPageData(url):
 
     soup = BeautifulSoup(res.content, fromEncoding='utf-8')
 
-    titleSoup = soup.findAll('div', attrs={'class': 'show-title'})
-    titles = [el.find('a').text.encode('utf-8') for el in titleSoup]
+    titles = soup.findAll('div', attrs={'class': 'show-title'})
+    titles = [el.find('a').text.encode('utf-8') for el in titles]
 
-    bodySoup = soup.findAll('div', attrs={'class': 'show-body'})
-    bodies = [reduce(lambda a,b: a+b.__str__('utf-8'), el.findAll('p'), '') for el in bodySoup]
+    bodies = soup.findAll('div', attrs={'class': 'show-body'})
+    bodies = [reduce(lambda a,b: a+b.__str__('utf-8'), el.findAll('p'), '') for el in bodies]
 
     next = soup.find('a', attrs={'class': 'next_page'})
     return zip(titles, bodies), next['href'] if next else None
@@ -34,14 +34,11 @@ def getPagesData(host, url):
 
 
 def getBrushupData(user, filename):
-    rows = []
-    rows += getPagesData(HOST, user + '/completed')
-    rows += getPagesData(HOST, user + '/list')
-    rows += getPagesData(HOST, user + '/today')
-
     with open(filename, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter='\t')
-        writer.writerows(rows)
+        writer.writerows(getPagesData(HOST, user + '/completed'))
+        writer.writerows(getPagesData(HOST, user + '/list'))
+        writer.writerows(getPagesData(HOST, user + '/today'))
 
 
 if __name__ == '__main__':
